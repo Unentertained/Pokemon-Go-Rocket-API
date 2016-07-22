@@ -175,17 +175,22 @@ namespace PokemonGo.RocketAPI.Logic
             }
         }
 
-        private async Task TransferDuplicatePokemon(bool keepPokemonsThatCanEvolve = false)
-        {
-            var duplicatePokemons = await _inventory.GetDuplicatePokemonToTransfer(keepPokemonsThatCanEvolve);
-
-            foreach (var duplicatePokemon in duplicatePokemons)
+    private async Task TransferDuplicatePokemon(bool keepPokemonsThatCanEvolve = false)
             {
-                var transfer = await _client.TransferPokemon(duplicatePokemon.Id);
-                Logger.Write($"Transfer {duplicatePokemon.PokemonId} with {duplicatePokemon.Cp} CP", LogLevel.Info);
-                await Task.Delay(500);
-            }
-        }
+                var duplicatePokemons = await _inventory.GetDuplicatePokemonToTransfer(keepPokemonsThatCanEvolve);
+
+                foreach (var duplicatePokemon in duplicatePokemons)
+                {
+                    int iv = duplicatePokemon.IndividualAttack + duplicatePokemon.IndividualDefense + duplicatePokemon.IndividualStamina;
+                    double ivPercentage = iv / 45;
+                    if (ivPercentage < 80)
+                    {
+                        var transfer = await _client.TransferPokemon(duplicatePokemon.Id);
+                        Logger.Write($"Transfer {duplicatePokemon.PokemonId} with {duplicatePokemon.Cp} CP", LogLevel.Info);
+                        await Task.Delay(500);
+                    }
+                }
+            }   
 
         private async Task RecycleItems()
         {
